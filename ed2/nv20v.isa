@@ -1,0 +1,98 @@
+[...]
+
+%bitfields
+
+last = 0;
+idxc = 1;
+sdst = 2;
+odst = 3:6;
+cdst = 3:10;
+cdstf = 11;
+odst_wrmask = 12:15;
+stdst_wrmask = 16:19;
+tdst = 20:23;
+vtdst_wrmask = 24:27;
+src2_bf = 29:42;
+src1_bf = 43:57;
+src0_bf = 58:72;
+isrc = 73:76;
+csrc = 77:84;
+vop = 85:88;
+sop = 89:92;
+
+src_type = src.0:1;
+src_temp = src.2:5;
+src_swz = src.6:13;
+src_neg = src.14;
+
+%mods
+
+src_neg_mod = [src_neg] {
+	0: -,
+	1: neg,
+};
+
+%operands
+
+adst = $a0.x;
+asrc = $a0.x;
+
+src = [src_type] {
+	1: src_neg_mod $r(src_temp).(SWZ src_swz),
+	2: src_neg_mod $i(isrc).(SWZ src_swz),
+	3: [idxc] {
+		0: src_neg_mod c[#(csrc)].(SWZ src_swz),
+		1: src_neg_mod c[#(csrc) + asrc].(SWZ src_swz),
+	},
+};
+
+src0 = [src <- src0_bf] src;
+src1 = [src <- src1_bf] src;
+src2 = [src <- src2_bf] src;
+
+odst = [cdstf] {
+	0: c[#(cdst)].(MASK odst_wrmask),
+	1: $o(odst).(MASK odst_wrmask),
+};
+
+vdst = odst | vtdst;
+sdst = odst | stdst;
+
+%instructions
+
+vector = [vop] {
+	0x0: nop,
+	0x1: mov vdst src0,
+	0x2: mul vdst src0 src1,
+	0x3: add vdst src0 src2,
+	0x4: mad vdst src0 src1 src2,
+	0x5: dp3 vdst src0 src1,
+	0x6: dph vdst src0 src1,
+	0x7: dp4 vdst src0 src1,
+	0x8: dst vdst src0 src1,
+	0x9: min vdst src0 src1,
+	0xa: max vdst src0 src1,
+	0xb: slt vdst src0 src1,
+	0xc: sge vdst src0 src1,
+	0xd: arl adst src0,
+};
+
+scalar = [sop] {
+	0x0: nop,
+	0x1: mov sdst src2,
+	0x2: rcp sdst src2,
+	0x3: rcc sdst src2,
+	0x4: rsq sdst src2,
+	0x5: exp sdst src2,
+	0x6: log sdst src2,
+	0x7: lit sdst src2,
+};
+
+exit = [last] {
+	0: nop,
+	1: exit,
+};
+
+%forms
+
+root = 128 vector & scalar & exit;

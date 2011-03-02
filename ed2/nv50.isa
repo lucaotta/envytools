@@ -1,0 +1,120 @@
+[...]
+
+%bitfields
+
+op = 28:31;
+op2 = 61:63;
+pred = 39:43;
+cond = 44:45;
+lsrc = 9:15;
+lsrc3 = 46:52;
+lasrc = 26:27 34;
+ldst = 2:8;
+adst = 2:4;
+fmem32 = 9:22 WRAP;
+btarg = 11:26 46:51 << 2;
+
+%operands
+
+cond = $c(cond);
+
+lasrc = $a(lasrc);
+lsrc = $r(lsrc);
+lsrc3 = $r(lsrc3);
+ldst = $r(ldst);
+adst = $a(adst);
+fout32 = o[lasrc + #(fmem32)];
+btarg = #(btarg);
+
+%instructions
+
+ilong = [op] {
+	0: ppred [op2] {
+		1: mov ldst cond,
+		2: mov ldst lasrc,
+		3: mov ldst sreg,
+		4: st b32 fout32 lsrc3,
+		5: mov cdst lsrc,
+	},
+	0xf: [op2] {
+		6: ppred [9:10] {
+			1: emit [GP],
+			2: restart [GP],
+		},
+		7: [34] {
+			0: nop,
+			1: pmevent #(10:13),
+		},
+	},
+}; 
+
+ishort = [op] {
+}; 
+
+iimm = [op] {
+}; 
+
+clong = [op] {
+	0: ppred discard [FP],
+	1: ppred bra btarg,
+	2: call lim btarg,
+	0xb: brkpt [NV84:],
+}; 
+
+cshort = [op] {
+	0xb: brkpt [NV84:],
+}; 
+
+%modifiers
+
+lim = [38] {
+	0: -,
+	1: lim,
+};
+
+%prefixes
+
+ppred = [pred] {
+	0x00: never,
+	0x01: l cond,
+	0x02: e cond,
+	0x03: le cond,
+	0x04: g cond,
+	0x05: lg cond,
+	0x05: nz cond,
+	0x06: eg cond,
+	0x07: leg cond,
+	0x07: num cond,
+	0x08: u cond,
+	0x08: nan cond,
+	0x09: lu cond,
+	0x0a: eu cond,
+	0x0a: z cond,
+	0x0b: leu cond
+	0x0c: gu cond,
+	0x0d: lgu cond,
+	0x0e: egu cond,
+	0x0f: -,
+	0x10: o cond,
+	0x11: c cond,
+	0x12: na cond,
+	0x13: s cond,
+	0x1c: ns cond,
+	0x1d: a cond,
+	0x1e: nc cond,
+	0x1f: no cond,
+}
+
+%forms
+
+root = [0:1] {
+	0: 32 ishort,
+	1: [32:33] {
+		0: 64 ilong,
+		1: 64 ilong & exit,
+		2: 64 ilong & join,
+		3: 64 iimm,
+	},
+	2: 32 cshort,
+	3: 64 clong,
+};

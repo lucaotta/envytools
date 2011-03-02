@@ -1,0 +1,110 @@
+maxoplen = 4
+piecelen = 1
+bytelen = 1
+
+%forms
+
+root = [0:7] {
+	0x00/0xc0:	sized,
+	0x40/0xc0:	sized,
+	0x80/0xc0:	sized,
+	0xc0/0xf0:	24 opcx,
+	0xd0/0xf0:	24 opdx,
+	0xe0/0xf0:	32 opex,
+	0xf0:		24 opf0,
+	0xf1:		32 opf1,
+	0xf2:		24 opf2,
+	0xf4:		24 opf4,
+	0xf5:		32 opf5,
+	0xf8:		16 opf8,
+	0xf9:		16 opf9,
+	0xfa:		24 opfa,
+	0xfc:		16 opfc,
+	0xfd:		24 opfd,
+	0xfe:		24 opfe,
+	0xff:		24 opff,
+};
+
+sized: [0:5] {
+	0x00/0x30:	24 op0x,
+	0x10/0x30:	24 op1x,
+	0x20/0x30:	32 op2x,
+	0x30:		24 op30,
+	0x31:		32 op31,
+	0x34:		24 op34,
+	0x36:		24 op36,
+	0x37:		32 op37,
+	0x38:		24 op38,
+	0x39:		24 op39,
+	0x3a:		24 op3a,
+	0x3b:		24 op3b,
+	0x3c:		24 op3c,
+	0x3d:		16 op3d,
+};
+
+%opcodes
+
+opcx: = [0:3] {
+	0x0: mulu size reg1 reg2 imm8,
+	0x1: muls size reg1 reg2 imm8s,
+	0x2: sex size reg1 reg2 imm8,
+	0x3: extrs size reg1 reg2 bitf8 [NVA3:],
+	0xf: iord size reg1 iori,
+};
+
+%modifiers
+
+size = [6:7] {
+	0: b8,
+	1: b16,
+	2: b32,
+};
+
+%bitfields
+
+imm16 = 16:31;
+imm8 = 16:23;
+imm16s = 16:31 S;
+imm8s = 16:23 S;
+imm16w = 16:31 W;
+imm16h = 16:31 <<16;
+imm8h = 16:23 <<16;
+strap = 8:9;
+cimm2 = 20:25;
+
+off8 = 16:23;
+off16 = 16:23 <<1;
+off32 = 16:23 <<2;
+
+%registers
+
+reg1 = $r(8:11);
+reg2 = $r(12:15);
+reg3 = $r(20:23);
+pred1 = $p(8:10);
+pred2 = $p(16:18);
+creg1 = $c(16:18);
+creg2 = $c(20:22);
+
+sreg = {
+0: $iv0,
+1: $iv1,
+3: $tv,
+4: $sp,
+5: $pc,
+
+-: $s(),
+}
+
+sreg1 = sreg(8-11);
+sreg2 = sreg(12-15);
+
+%memory
+
+datar: D[reg2]
+datari8: D[reg2 + #(off8)]
+datari16: D[reg2 + #(off16)]
+datari32: D[reg2 + #(off32)]
+datarr8: D[reg2 + reg1]
+datarr16: D[reg2 + reg1 * 2]
+datarr32: D[reg2 + reg1 * 4]
