@@ -72,7 +72,7 @@ sdst = odst | stdst;
 %instructions
 
 vector = [vop] {
-	0x0: "nop",
+	0x0: -,
 	0x1: "mov" vdst src0,
 	0x2: "mul" vdst src0 src1,
 	0x3: "add" vdst src0 src2,
@@ -90,7 +90,7 @@ vector = [vop] {
 };
 
 scalar = [sop] {
-	0x0: "nop",
+	0x0: -,
 	0x1: "mov" sdst src2,
 	0x2: "rcp" sdst src2,
 	0x3: "rcc" sdst src2,
@@ -102,7 +102,7 @@ scalar = [sop] {
 };
 
 exit = [last] {
-	0: "nop",
+	0: -,
 	1: "exit",
 };
 

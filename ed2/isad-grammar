@@ -15,6 +15,7 @@ varcmask: -
 varcmask: hex
 varcmask: hex / hex
 varcmask: hex - hex
+varcmask: hex - hex / hex
 
 varcopts: [ opt ]
 varcopts: [ opt : ]
@@ -101,6 +102,7 @@ atomoper: MEM ( memname , operdesc )
 atomoper: MEM ( memname lbfspec , operdesc )
 atomoper: MEM ( operdesc )
 atomoper: #
+atomoper: num
 atomoper: [ atomoper ]
 atomoper: id.oper
 atomoper: (iname insnmod* shortoper*)
@@ -148,6 +150,8 @@ insndesc: bfset insndesc
 insndesc: id.insn
 insndesc: id.pref* iname insnmod* shortoper*
 insndesc: id.pref* UNK insnmod* shortoper*
+insndesc: insndesc & insndesc
+insndesc: -
 
 insnmod: id.mod
 insnmod: mname

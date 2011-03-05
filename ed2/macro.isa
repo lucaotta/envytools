@@ -1,0 +1,112 @@
+maxoplen = 4;
+piecelen = 4;
+bytelen = 4;
+
+
+%parts
+
+reg;
+
+
+%operands
+
+bfsrcpos = IMM(17:21);
+bfsz = IMM(22:26);
+bfdstpos = IMM(27:31);
+mimm = IMM(14:31 S);
+btarg = IMM(14:31 S PCREL BT); // XXX: check size.
+
+reg1 = [8:10] {
+	0: #,
+	-: $r(8:10);
+};
+
+reg2 = [11:13] {
+	0: 0,
+	-: $r(11:13);
+};
+
+reg3 = [14:16] {
+	0: 0,
+	-: $r(14:16);
+};
+
+raddr = reg2 + mimm;
+
+
+%instructions
+
+tpsrcbin = [17:21] {
+	0x00: "add" reg2 reg3,
+	0x01: "adc" reg2 reg3,
+	0x02: "sub" reg2 reg3,
+	0x03: "sbb" reg2 reg3,
+	0x08: "xor" reg2 reg3,
+	0x09: "or" reg2 reg3,
+	0x0a: "and" reg2 reg3,
+	0x0b: "andn" reg2 reg3,
+	0x0c: "nand" reg2 reg3,
+	-: UNK reg2 reg3,
+};
+tpsrcei = "extrinsrt" reg2 reg3 bfsrcpos bfsz bfdstpos;
+tpsrces3 = "extrshl" reg3 reg2 bfsz bfdstpos;
+tpsrces4 = "extrshl" reg3 bfsrcpos bfsz reg2;
+
+
+%operands
+
+tpsrc = {
+	0x0000/0x0007: tpsrcbin,
+	0x0001/0x3807: mimm,
+	0x0001/0xffffc007: reg2,
+	0x0001/0x0007: reg2 + mimm,
+	0x0002/0x0007: tpsrcei,
+	0x0003/0x0007: tpsrces3,
+	0x0004/0x0007: tpsrces4,
+};
+
+
+%modifiers
+
+annul = [5] {
+	0: -,
+	1: "annul",
+};
+
+
+%instructions
+
+exit = [7] {
+	0: -,
+	1: "exit",
+};
+
+twopart = {
+	0x0001/0xfffff87f: "parm" reg1,
+	0x0000/0x0070: "parm" reg1 & "ign", tpsrc,
+	0x0011/0xffffff7f: -,
+	0x0010/0x0070: "mov" reg1, tpsrc,
+	0x0020/0x0770: "maddr" tpsrc,
+	0x0020/0x0070: "maddr" reg1 tpsrc,
+	0x0030/0x0070: "send" tpsrc & "parm" reg1,
+	0x0040/0x0770: "send" tpsrc,
+	0x0040/0x0070: "send" reg1 tpsrc,
+	0x0050/0x0070: "maddr" tpsrc & "parm" reg1,
+	0x0060/0x0770: "maddr" tpsrc & "parmsend",
+	0x0060/0x0070: "maddr" reg1 tpsrc & "parmsend",
+	0x0070/0x0770: "maddrsend" tpsrc,
+	0x0070/0x0070: "maddrsend" reg1 tpsrc,
+};
+
+insn = {
+	0-4/7: twopart,
+	0x0015/0x0077: "read" reg1 raddr,
+	0x0007/0x3817: "bra" annul btarg,
+	0x0007/0x0017: "braz" annul reg2 btarg,
+	0x0017/0x0017: "branz" annul reg2 btarg,
+};
+
+
+%forms
+
+root = 32 insn & exit;

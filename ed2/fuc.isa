@@ -39,7 +39,7 @@ sreg = [sr] {
 	0xa: $cauth,
 	0xb: $xtargets,
 	0xc [NVA3:]: $tstatus,
-	-: $s(: UNK),
+	-: $s(sr UNK),
 };
 sreg1 = [sr <- 8:11] sreg;
 sreg2 = [sr <- 12:15] sreg;
