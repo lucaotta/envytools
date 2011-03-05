@@ -1,0 +1,160 @@
+file: hline* group*
+
+hline: id = num ;
+
+group: %bitfields bitfield*
+group: %modifiers modifier*
+group: %prefixes prefix*
+group: %operands operand*
+group: %instructions instruction*
+group: %forms form*
+
+
+varcmask: -
+varcmask: hex
+varcmask: hex / hex
+varcmask: hex - hex
+
+varcopts: [ opt ]
+varcopts: [ opt : ]
+varcopts: [ opt : opt ]
+varcopts: [ : opt ]
+varcopts: [ opt - ]
+varcopts: [ opt - opt ]
+varcopts: [ - opt ]
+
+varchoice: varcmask varcopts* :
+
+varbf: [ bfspec ]
+varbf: [ id.bitset ]
+varbf:
+
+bfset: [ id.bitset <- bfspec ]
+bfset: [ <- bfspec ]
+
+
+bitfield: id.bf = bfspec ;
+
+bfspec: bfmod+
+bfspec: id.bf
+
+lbfspec: bfspec
+lbfspec: id.bitset
+lbfspec: :
+
+bfmod: sbf
+bfmod: << num
+bfmod: S
+bfmod: SS
+bfmod: US
+bfmod: + num
+bfmod: PCREL
+bfmod: PCREL ( pcrelmod* )
+bfmod: W
+
+pcrelmod: + num
+pcrelmod: & num
+
+sbf: num
+sbf: num : num
+sbf: id.bitset . num
+sbf: id.bitset . num : num
+
+
+modifier: id.mod = moddesc ;
+
+modvar: varchoice moddesc ,
+
+moddesc: varbf { modvar* }
+moddesc: bfset moddesc
+moddesc: id.mod
+moddesc: -
+moddesc: mname*
+
+
+operand: id.oper = operdesc ;
+
+opervar: varchoice operdesc ,
+
+operdesc: varbf { opervar* }
+operdesc: bfset operdesc
+operdesc: id.mod operdesc
+operdesc: shortoper
+
+shortoper: shortoper | sumoper
+shortoper: sumoper
+
+sumoper: sumoper + atomoper
+sumoper: sumoper + atomoper * num
+sumoper: sumoper + atomoper << num
+sumoper: atomoper
+
+atomoper: regname
+atomoper: regname ( regmod* )
+atomoper: regname ( lbfspec regmod* )
+atomoper: # ( lbfspec immmod* )
+atomoper: #
+atomoper: memname ( lbfspec ) [ atomoper ]
+atomoper: memname [ atomoper ]
+atomoper: [ atomoper ]
+atomoper: id.oper
+atomoper: (iname insnmod* shortoper*)
+atomoper: id.insn
+atomoper: cname
+atomoper: cname ( immod* )
+atomoper: atomoper . ( MASK num bfspec )
+atomoper: atomoper . ( SWZ num num bfspec swzend )
+
+swzend: BE
+swzend: LE
+swzend:
+
+regmod: C
+regmod: U
+regmod: HL
+
+immmod: C
+immmod: U
+immmod: BT
+immmod: CT
+
+
+prefix: id.pref = prefdesc;
+
+prefvar: varchoice prefdesc ,
+
+prefdesc: varbf { prefvar* }
+prefdesc: bfset prefdesc
+prefdesc: id.pref
+prefdesc: pname operspec
+prefdesc: pname 
+prefdesc: operspec
+
+
+instruction: id.insn = insndesc ;
+
+insnvar: varchoice insndesc ,
+
+insndesc: varbf { insnvar* }
+insndesc: bfset insndesc
+insndesc: id.insn
+insndesc: id.pref* iname insnmod* shortoper*
+
+insnmod: id.mod
+insnmod: mname
+
+
+form: id.form = formdesc ;
+
+formvar: varchoice formdesc ,
+
+formdesc: varbf { formvar* }
+formdesc: oplen insns
+formdesc: id.form
+formdesc: bfset formdesc
+
+oplen: num
+oplen: num / num
+
+insns: insndesc
+insns: insns & insndesc
