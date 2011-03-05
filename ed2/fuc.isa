@@ -1,11 +1,16 @@
-maxoplen = 4
-piecelen = 1
-bytelen = 1
+maxoplen = 4;
+piecelen = 1;
+bytelen = 1;
 
 
 %variants
 
 chipset = NV98 NVA3;
+
+
+%parts
+
+sr;
 
 
 %operands
@@ -21,7 +26,7 @@ reg1 = $r(8:11);
 reg2 = $r(12:15);
 reg3 = $r(20:23);
 
-sreg = {
+sreg = [sr] {
 	0x0: $iv0,
 	0x1: $iv1,
 	0x3: $tv,
@@ -36,8 +41,8 @@ sreg = {
 	0xc [NVA3:]: $tstatus,
 	-: $s(: UNK),
 };
-sreg1 = [<-8:11] sreg;
-sreg2 = [<-12:15] sreg;
+sreg1 = [sr <- 8:11] sreg;
+sreg2 = [sr <- 12:15] sreg;
 
 pred1 = $p(8:10);
 pred2 = $p(16:18);
@@ -132,6 +137,42 @@ size = [6:7] {
 	1: "b16",
 	2: "b32",
 	2: -,
+};
+
+bpred = [8:12] {
+	0x00: "p0",
+	0x01: "p1",
+	0x02: "p2",
+	0x03: "p3",
+	0x04: "p4",
+	0x05: "p5",
+	0x06: "p6",
+	0x07: "p7",
+	0x08: "c",
+	0x09: "o",
+	0x0a: "s",
+	0x0b: "z",
+	0x0b: "e",
+	0x0c: "a",
+	0x0d: "na",
+	0x0e: -,
+	0x10: "np0",
+	0x11: "np1",
+	0x12: "np2",
+	0x13: "np3",
+	0x14: "np4",
+	0x15: "np5",
+	0x16: "np6",
+	0x17: "np7",
+	0x18: "nc",
+	0x19: "no",
+	0x1a: "ns",
+	0x1b: "nz",
+	0x1b: "ne",
+	0x1c [NVA3:]: "g",
+	0x1d [NVA3:]: "le",
+	0x1e [NVA3:]: "l",
+	0x1f [NVA3:]: "ge",
 };
 
 
@@ -334,12 +375,35 @@ opf1 = [8:11] {
 
 opf2 = [8:11] {
 	0x8: "setp" flag reg2,
-	0xc: "cicmd" imm8 reg2, // XXX: ccmds
+	0xc: [16:20] {
+		0x01: "cimov" reg2,
+		0x02: "cixsin" reg2,
+		0x03: "cixsout" reg2,
+		0x05: "cis0begin" reg2,
+		0x06: "cis0exec" reg2,
+		0x07: "cis1begin" reg2,
+		0x08: "cis1exec" reg2,
+		0x0b: "cixor" reg2,
+		0x0c: "ciadd" reg2,
+		0x0d: "ciand" reg2,
+		0x0e: "cirev" reg2,
+		0x0f: "ciprecmac" reg2,
+		0x10: "cisecret" reg2,
+		0x11: "cikeyreg" reg2,
+		0x12: "cikexp" reg2,
+		0x13: "cikrexp" reg2,
+		0x14: "cienc" reg2,
+		0x15: "cidec" reg2,
+		0x17: "cisigenc" reg2,
+		-: "cicmd" IMM(16:23 UNK) reg2,
+	},
 	-: UNK reg2 imm8,
 };
 
 opf4 = [8:13] {
-	0x00: "bra" bpred srbtarg,
+	0x00/0x38: "bra" pred1 srbtarg,
+	0x10/0x38: "bra" "not" pred1 srbtarg,
+	0x00/0x20: "bra" bpred srbtarg,
 	0x20: "bra" sabtarg,
 	0x21: "call" sactarg,
 	0x28: "sleep" flag,
@@ -352,11 +416,35 @@ opf4 = [8:13] {
 };
 
 opf5 = [8:13] {
+	0x00/0x38: "bra" pred1 lrbtarg,
+	0x10/0x38: "bra" "not" pred1 lrbtarg,
 	0x00/0x20: "bra" bpred lrbtarg,
 	0x20: "bra" labtarg,
 	0x21: "call" lactarg,
 	0x30: "add" $sp imm8s,
-	0x3c: "ccmd" imm16, // XXX: ccmds
+	0x3c: { [26:31] {
+		0/0x20: "cxset" imm8,
+		0x21: "cmov" creg1 creg2,
+		0x22: "cxsin" creg1,
+		0x23: "cxsout" creg1,
+		0x25: "cs0begin" cimm,
+		0x26: "cs0exec" cimm,
+		0x27: "cs1begin" cimm,
+		0x28: "cs1exec" cimm,
+		0x2b: "cxor" creg1 creg2,
+		0x2c: "cadd" creg1 cimm,
+		0x2d: "cand" creg1 creg2,
+		0x2e: "crev" creg1 creg2,
+		0x2f: "cprecmac" creg1 creg2,
+		0x30: "csecret" creg1 cimm,
+		0x31: "ckeyreg" creg1,
+		0x32: "ckexp" creg1 creg2,
+		0x33: "ckrexp" creg1 creg2,
+		0x34: "cenc" creg1 creg2,
+		0x35: "cdec" creg1 creg2,
+		0x37: "csigenc" creg1 creg2,
+		-: "ccmd" IMM(16:31 UNK),
+	},
 	-: UNK imm16,
 };
 
