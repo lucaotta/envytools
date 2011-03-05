@@ -2,6 +2,441 @@ maxoplen = 4
 piecelen = 1
 bytelen = 1
 
+
+%variants
+
+chipset = NV98 NVA3;
+
+
+%operands
+
+srbtarg = IMM(16:23 S PCREL BT);
+lrbtarg = IMM(16:31 W PCREL BT);
+sabtarg = IMM(16:23 U BT);
+labtarg = IMM(16:31 W BT);
+sactarg = IMM(16:23 U CT);
+lactarg = IMM(16:31 W CT);
+
+reg1 = $r(8:11);
+reg2 = $r(12:15);
+reg3 = $r(20:23);
+
+sreg = {
+	0x0: $iv0,
+	0x1: $iv1,
+	0x3: $tv,
+	0x4: $sp,
+	0x5: $pc,
+	0x6: $xcbase,
+	0x7: $xdbase,
+	0x8: $flags,
+	0x9: $cx,
+	0xa: $cauth,
+	0xb: $xtargets,
+	0xc [NVA3:]: $tstatus,
+	-: $s(: UNK),
+};
+sreg1 = [<-8:11] sreg;
+sreg2 = [<-12:15] sreg;
+
+pred1 = $p(8:10);
+pred2 = $p(16:18);
+
+creg1 = $c(16:18);
+creg2 = $c(20:22);
+
+imm8 = IMM(16:23);
+imm16 = IMM(16:31);
+
+imm8s = IMM(16:23 S);
+imm16s = IMM(16:31 S);
+
+imm8w = IMM(16:23 W);
+imm16w = IMM(16:31 W);
+
+imm8a = [6:7] {
+	0: imm8w,
+	1: imm8,
+	2: imm8,
+};
+imm16a = [6:7] {
+	0: imm16w,
+	1: imm16w,
+	2: imm16,
+};
+
+imm8as = [6:7] {
+	0: imm8w,
+	1: imm8s,
+	2: imm8s,
+};
+imm16as = [6:7] {
+	0: imm16w,
+	1: imm16w,
+	2: imm16s,
+};
+
+imm8h = IMM(16:23 <<16);
+imm16h = IMM(16:31 <<16 W);
+
+flag = [16:20] {
+	0x00/0x18: pred2,
+	0x08: $c,
+	0x09: $o,
+	0x0a: $s,
+	0x0b: $z,
+	0x10: $ie0,
+	0x11: $ie1,
+	0x14: $is0,
+	0x15: $is1,
+	0x18: $ta,
+	-: imm8,
+};
+
+cimm = IMM(20:25);
+
+bitf8 = BF(16:20, 21:23);
+bitf16 = BF(16:20, 21:25);
+
+datar = MEM(D, reg2);
+datari = [6:7] {
+	0: MEM(D, reg2 + IMM(16:23)),
+	1: MEM(D, reg2 + IMM(16:23 <<1)),
+	2: MEM(D, reg2 + IMM(16:23 <<2)),
+};
+datarr = [6:7] {
+	0: MEM(D, reg2 + reg1),
+	1: MEM(D, reg2 + reg1 * 2),
+	2: MEM(D, reg2 + reg1 * 4),
+};
+dataspi = [6:7] {
+	0: MEM(D, $sp + IMM(16:23)),
+	1: MEM(D, $sp + IMM(16:23 <<1)),
+	2: MEM(D, $sp + IMM(16:23 <<2)),
+};
+dataspr = [6:7] {
+	0: MEM(D, $sp + reg1),
+	1: MEM(D, $sp + reg1 * 2),
+	2: MEM(D, $sp + reg1 * 4),
+};
+
+ior = MEM(I, reg2);
+iorr = MEM(I, reg2 + reg1 * 4);
+iori = MEM(I, reg2 + IMM(16:23 <<2));
+
+
+%modifiers
+
+size = [6:7] {
+	0: "b8",
+	1: "b16",
+	2: "b32",
+	2: -,
+};
+
+
+%opcodes
+
+op0x = [0:3] {
+	0x0: "st" size datari reg1,
+	-: UNK size reg1 reg2 imm8a,
+};
+
+op1x = [0:3] {
+	0x0: "add" size reg1 reg2 imm8a,
+	0x1: "adc" size reg1 reg2 imm8a,
+	0x2: "sub" size reg1 reg2 imm8a,
+	0x3: "sbb" size reg1 reg2 imm8a,
+	0x4: "shl" size reg1 reg2 imm8,
+	0x5: "shr" size reg1 reg2 imm8,
+	0x7: "sar" size reg1 reg2 imm8,
+	0x8: "ld" size reg1 datari,
+	0xc: "shlc" size reg1 reg2 imm8,
+	0xd: "shrc" size reg1 reg2 imm8,
+	-: UNK size reg1 reg2 imm8a,
+};
+
+op2x = [0:3] {
+	0x0: "add" size reg1 reg2 imm16a,
+	0x1: "adc" size reg1 reg2 imm16a,
+	0x2: "sub" size reg1 reg2 imm16a,
+	0x3: "sbb" size reg1 reg2 imm16a,
+	-: UNK size reg1 reg2 imm16a,
+};
+
+op30 = [8:11] {
+	0x1: "st" size dataspi reg1,
+	0x4: "cmpu" size reg2 imm8a,
+	0x5: "cmps" size reg2 imm8as,
+	0x6 [NVA3:]: "cmp" size reg2 imm8as,
+	-: UNK size reg2 imm8a,
+};
+
+op31 = [8:11] {
+	0x4: "cmpu" size reg2 imm16a,
+	0x5: "cmps" size reg2 imm16as,
+	0x6 [NVA3:]: "cmp" size reg2 imm16as,
+	-: UNK size reg2 imm16a,
+};
+
+op34 = [8:11] {
+	0x0: "ld" size reg2 dataspi,
+	-: UNK size reg2 imm8a,
+};
+
+op36 = [8:11] {
+	0x0: "add" size reg2 imm8a,
+	0x1: "adc" size reg2 imm8a,
+	0x2: "sub" size reg2 imm8a,
+	0x3: "sbb" size reg2 imm8a,
+	0x4: "shl" size reg2 imm8,
+	0x5: "shr" size reg2 imm8,
+	0x7: "sar" size reg2 imm8,
+	0xc: "shlc" size reg2 imm8,
+	0xd: "shrc" size reg2 imm8,
+	-: UNK size reg2 imm8a,
+};
+
+op37 = [8:11] {
+	0x0: "add" size reg2 imm16a,
+	0x1: "adc" size reg2 imm16a,
+	0x2: "sub" size reg2 imm16a,
+	0x3: "sbb" size reg2 imm16a,
+	-: UNK size reg2 imm16a,
+};
+
+op38 = [16:19] {
+	0x0: "st" size datar reg1,
+	0x1: "st" size dataspr reg2,
+	0x4: "cmpu" size reg2 reg1,
+	0x5: "cmps" size reg2 reg1,
+	0x6 [NVA3:]: "cmp" size reg2 reg1,
+	-: UNK size reg2 reg1,
+};
+
+op39 = [16:19] {
+	0x0: "not" size reg1 reg2,
+	0x1: "neg" size reg1 reg2,
+	0x2 [NV98]: "movf" size reg1 reg2,
+	0x2 [NVA3:]: "mov" size reg1 reg2,
+	0x3: "hswap" size reg1 reg2,
+	-: UNK size reg1 reg2,
+};
+
+op3a = [16:19] {
+	0x0: "ld" size reg2 dataspr,
+	-: UNK size reg2 reg1,
+};
+
+op3b = [16:19] {
+	0x0: "add" size reg2 reg1,
+	0x1: "adc" size reg2 reg1,
+	0x2: "sub" size reg2 reg1,
+	0x3: "sbb" size reg2 reg1,
+	0x4: "shl" size reg2 reg1,
+	0x5: "shr" size reg2 reg1,
+	0x7: "sar" size reg2 reg1,
+	0xc: "shlc" size reg2 reg1,
+	0xd: "shrc" size reg2 reg1,
+	-: UNK size reg2 reg1,
+};
+
+op3c = [16:19] {
+	0x0: "add" size reg3 reg2 reg1,
+	0x1: "adc" size reg3 reg2 reg1,
+	0x2: "sub" size reg3 reg2 reg1,
+	0x3: "sbb" size reg3 reg2 reg1,
+	0x4: "shl" size reg3 reg2 reg1,
+	0x5: "shr" size reg3 reg2 reg1,
+	0x7: "sar" size reg3 reg2 reg1,
+	0x8: "ld" size reg3 datarr,
+	0xc: "shlc" size reg3 reg2 reg1,
+	0xd: "shrc" size reg3 reg2 reg1,
+	-: UNK size reg3 reg2 reg1,
+};
+
+op3d = [8:11] {
+	0x0: "not" size reg2,
+	0x1: "neg" size reg2,
+	0x2 [NV98]: "movf" size reg2,
+	0x2 [NVA3:]: "mov" size reg2,
+	0x3: "hswap" size reg2,
+	0x4: "clear" size reg2,
+	0x5 [NVA3:]: "setf" size reg2,
+	-: UNK size reg2,
+};
+
+opcx = [0:3] {
+	0x0: "mulu" reg1 reg2 imm8,
+	0x1: "muls" reg1 reg2 imm8s,
+	0x2: "sex" reg1 reg2 imm8,
+	0x3 [NVA3:]: "extrs" reg1 reg2 bitf8,
+	0x4: "and" reg1 reg2 imm8,
+	0x5: "or" reg1 reg2 imm8,
+	0x6: "xor" reg1 reg2 imm8,
+	0x7 [NVA3:]: "extr" reg1 reg2 bitf8,
+	0x8: "xbit" reg1 reg2 imm8,
+	0xb [NVA3:]: "ins" reg1 reg2 bitf8,
+	0xc [NVA3:]: "div" reg1 reg2 imm8,
+	0xd [NVA3:]: "mod" reg1 reg2 imm8,
+	0xe: UNK reg1 iori,
+	0xf: "iord" reg1 iori,
+	-: UNK reg1 reg2 imm8,
+};
+
+opdx = [0:3] {
+	0x0: "iowr" iori reg1,
+	0x0 [NVA3+]: "iowrs" iori reg1,
+	-: UNK reg1 reg2 imm8,
+};
+
+opex = [0:3] {
+	0x0: "mulu" reg1 reg2 imm16,
+	0x1: "muls" reg1 reg2 imm16s,
+	0x3 [NVA3:]: "extrs" reg1 reg2 bitf16,
+	0x4: "and" reg1 reg2 imm16,
+	0x5: "or" reg1 reg2 imm16,
+	0x6: "xor" reg1 reg2 imm16,
+	0x7 [NVA3:]: "extr" reg1 reg2 bitf16,
+	0xb [NVA3:]: "ins" reg1 reg2 bitf16,
+	0xc [NVA3:]: "div" reg1 reg2 imm16,
+	0xd [NVA3:]: "mod" reg1 reg2 imm16,
+	-: UNK reg1 reg2 imm16,
+};
+
+opf0 = [8:11] {
+	0x0: "mulu" reg2 imm8,
+	0x1: "muls" reg2 imm8s,
+	0x2: "sex" reg2 imm8,
+	0x3: "sethi" reg2 imm8h,
+	0x4: "and" reg2 imm8,
+	0x5: "or" reg2 imm8,
+	0x6: "xor" reg2 imm8,
+	0x7: "mov" reg2 imm8,
+	0x9: "bset" reg2 imm8,
+	0xa: "bclr" reg2 imm8,
+	0xb: "btgl" reg2 imm8,
+	0xc: "xbit" reg2 $flags flag,
+	-: UNK reg2 imm8,
+};
+
+opf1 = [8:11] {
+	0x0: "mulu" reg2 imm16,
+	0x1: "muls" reg2 imm16s,
+	0x3: "sethi" reg2 imm16h,
+	0x4: "and" reg2 imm16,
+	0x5: "or" reg2 imm16,
+	0x6: "xor" reg2 imm16,
+	0x7: "mov" reg2 imm16,
+	0x7: "movw" reg2 imm16w,
+	-: UNK reg2 imm16,
+};
+
+opf2 = [8:11] {
+	0x8: "setp" flag reg2,
+	0xc: "cicmd" imm8 reg2, // XXX: ccmds
+	-: UNK reg2 imm8,
+};
+
+opf4 = [8:13] {
+	0x00: "bra" bpred srbtarg,
+	0x20: "bra" sabtarg,
+	0x21: "call" sactarg,
+	0x28: "sleep" flag,
+	0x30: "add" $sp imm8s,
+	0x31: "bset" $flags flag,
+	0x32: "bclr" $flags flag,
+	0x33: "btgl" $flags flag,
+	0x3c: "cxset" imm8,
+	-: UNK imm8,
+};
+
+opf5 = [8:13] {
+	0x00/0x20: "bra" bpred lrbtarg,
+	0x20: "bra" labtarg,
+	0x21: "call" lactarg,
+	0x30: "add" $sp imm8s,
+	0x3c: "ccmd" imm16, // XXX: ccmds
+	-: UNK imm16,
+};
+
+opf8 = [8:11] {
+	0x0: "ret",
+	0x1: "iret",
+	0x2: "exit",
+	0x3: "xdwait",
+	0x6: UNK,
+	0x7: "xcwait",
+	0x8/0xc [NVA3:]: "trap" IMM(8:9),
+	-: UNK,
+};
+
+opf9 = [8:11] {
+	0x0: "push" reg2,
+	0x1: "add" $sp reg2,
+	0x4: "bra" reg2,
+	0x5: "call" reg2,
+	0x8 [NVA3:]: "itlb" reg2,
+	0x9: "bset" $flags reg2,
+	0xa: "bclr" $flags reg2,
+	0xb: "btgl" $flags reg2,
+	-: UNK reg2,
+};
+
+opfa = [16:19] {
+	0x0: "iowr" ior reg1,
+	0x1 [NVA3:]: "iowrs" ior reg1,
+	0x4: "xcld" reg2 reg1,
+	0x5: "xdld" reg2 reg1,
+	0x6: "xdst" reg2 reg1,
+	0x8: "setp" reg1 reg2,
+	-: UNK reg2 reg1,
+};
+
+opfc = [8:11] {
+	0x0: "pop" reg2,
+	-: UNK reg2,
+};
+
+opfd = [16:19] {
+	0x0: "mulu" reg2 reg1,
+	0x1: "muls" reg2 reg1,
+	0x2: "sex" reg2 reg1,
+	0x4: "and" reg2 reg1,
+	0x5: "or" reg2 reg1,
+	0x6: "xor" reg2 reg1,
+	0x9: "bset" reg2 reg1,
+	0xa: "bclr" reg2 reg1,
+	0xb: "btgl" reg2 reg1,
+	-: UNK reg2 reg1,
+};
+
+opfe = [16:19] {
+	0x0: "mov" sreg1 reg2,
+	0x1: "mov" reg1 sreg2,
+	0x2 [NVA3:]: "ptlb" reg1 reg2,
+	0x3 [NVA3:]: "vtlb" reg1 reg2,
+	0xc: "xbit" reg1 $flags reg2,
+	-: UNK reg1 reg2,
+};
+
+opff = [16:19] {
+	0x0: "mulu" reg3 reg2 reg1
+	0x1: "muls" reg3 reg2 reg1
+	0x2: "sex" reg3 reg2 reg1
+	0x3 [NVA3:]: "extrs" reg3 reg2 reg1
+	0x4: "and" reg3 reg2 reg1
+	0x5: "or" reg3 reg2 reg1
+	0x6: "xor" reg3 reg2 reg1
+	0x7 [NVA3:]: "extr" reg3 reg2 reg1
+	0x8: "xbit" reg3 reg2 reg1
+	0xc [NVA3:]: "div" reg3 reg2 reg1
+	0xd [NVA3:]: "mod" reg3 reg2 reg1
+	0xe: UNK reg3 iorr
+	0xf: "iord" reg3 iorr
+	-: UNK reg3 reg2 reg1
+};
+
 %forms
 
 root = [0:7] {
@@ -25,7 +460,7 @@ root = [0:7] {
 	0xff:		24 opff,
 };
 
-sized: [0:5] {
+sized = [0:5] {
 	0x00/0x30:	24 op0x,
 	0x10/0x30:	24 op1x,
 	0x20/0x30:	32 op2x,
@@ -41,70 +476,3 @@ sized: [0:5] {
 	0x3c:		24 op3c,
 	0x3d:		16 op3d,
 };
-
-%opcodes
-
-opcx: = [0:3] {
-	0x0: mulu size reg1 reg2 imm8,
-	0x1: muls size reg1 reg2 imm8s,
-	0x2: sex size reg1 reg2 imm8,
-	0x3: extrs size reg1 reg2 bitf8 [NVA3:],
-	0xf: iord size reg1 iori,
-};
-
-%modifiers
-
-size = [6:7] {
-	0: b8,
-	1: b16,
-	2: b32,
-};
-
-%bitfields
-
-imm16 = 16:31;
-imm8 = 16:23;
-imm16s = 16:31 S;
-imm8s = 16:23 S;
-imm16w = 16:31 W;
-imm16h = 16:31 <<16;
-imm8h = 16:23 <<16;
-strap = 8:9;
-cimm2 = 20:25;
-
-off8 = 16:23;
-off16 = 16:23 <<1;
-off32 = 16:23 <<2;
-
-%registers
-
-reg1 = $r(8:11);
-reg2 = $r(12:15);
-reg3 = $r(20:23);
-pred1 = $p(8:10);
-pred2 = $p(16:18);
-creg1 = $c(16:18);
-creg2 = $c(20:22);
-
-sreg = {
-0: $iv0,
-1: $iv1,
-3: $tv,
-4: $sp,
-5: $pc,
-
--: $s(),
-}
-
-sreg1 = sreg(8-11);
-sreg2 = sreg(12-15);
-
-%memory
-
-datar: D[reg2]
-datari8: D[reg2 + #(off8)]
-datari16: D[reg2 + #(off16)]
-datari32: D[reg2 + #(off32)]
-datarr8: D[reg2 + reg1]
-datarr16: D[reg2 + reg1 * 2]
-datarr32: D[reg2 + reg1 * 4]

@@ -92,10 +92,11 @@ sumoper: atomoper
 atomoper: regname
 atomoper: regname ( regmod* )
 atomoper: regname ( lbfspec regmod* )
-atomoper: # ( lbfspec immmod* )
+atomoper: IMM ( lbfspec immmod* )
+atomoper: MEM ( memname , operdesc )
+atomoper: MEM ( memname lbfspec , operdesc )
+atomoper: MEM ( operdesc )
 atomoper: #
-atomoper: memname ( lbfspec ) [ atomoper ]
-atomoper: memname [ atomoper ]
 atomoper: [ atomoper ]
 atomoper: id.oper
 atomoper: (iname insnmod* shortoper*)
@@ -110,11 +111,11 @@ swzend: LE
 swzend:
 
 regmod: C
-regmod: U
+regmod: UNK
 regmod: HL
 
 immmod: C
-immmod: U
+immmod: UNK
 immmod: BT
 immmod: CT
 
