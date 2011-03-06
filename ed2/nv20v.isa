@@ -103,7 +103,7 @@ scalar = [sop] {
 
 exit = [last] {
 	0: -,
-	1: "exit",
+	1: "exit" ENDMARK,
 };
 
 %forms

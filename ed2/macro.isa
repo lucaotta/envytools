@@ -73,12 +73,17 @@ annul = [5] {
 	1: "annul",
 };
 
+braem = [5] {
+	0: ENDMARK(+1),
+	1: ENDMARK,
+};
+
 
 %instructions
 
 exit = [7] {
 	0: -,
-	1: "exit",
+	1: "exit" ENDMARK,
 };
 
 twopart = {
@@ -101,7 +106,7 @@ twopart = {
 insn = {
 	0-4/7: twopart,
 	0x0015/0x0077: "read" reg1 raddr,
-	0x0007/0x3817: "bra" annul btarg,
+	0x0007/0x3817: "bra" annul btarg braem,
 	0x0007/0x0017: "braz" annul reg2 btarg,
 	0x0017/0x0017: "branz" annul reg2 btarg,
 };

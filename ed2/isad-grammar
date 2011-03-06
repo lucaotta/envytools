@@ -98,9 +98,9 @@ atomoper: regname
 atomoper: regname ( regmod* )
 atomoper: regname ( lbfspec regmod* )
 atomoper: IMM ( lbfspec immmod* )
-atomoper: MEM ( memname , operdesc )
-atomoper: MEM ( memname lbfspec , operdesc )
-atomoper: MEM ( operdesc )
+atomoper: MEM ( memname , operdesc memmod* )
+atomoper: MEM ( memname lbfspec , operdesc memmod* )
+atomoper: MEM ( operdesc memmod* )
 atomoper: #
 atomoper: num
 atomoper: [ atomoper ]
@@ -125,6 +125,8 @@ immmod: C
 immmod: UNK
 immmod: BT
 immmod: CT
+
+memmod: LIT
 
 
 prefix: id.pref = prefdesc;

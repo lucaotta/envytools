@@ -1,0 +1,559 @@
+maxoplen = 4;
+piecelen = 1;
+bytelen = 1;
+
+%variants
+
+density = BOOL;
+loop = BOOL;
+el32r = BOOL;
+mul16 = BOOL;
+mul32 = BOOL;
+mul32high = BOOL;
+div32 = BOOL;
+mac16 = BOOL;
+clamps = BOOL;
+minmax = BOOL;
+nsa = BOOL;
+sext = BOOL;
+coproc = BOOL;
+boolean = BOOL;
+float = BOOL;
+mpsync = BOOL;
+condstore = BOOL;
+
+exception = BOOL;
+relocexc = BOOL;
+interrupt = BOOL;
+hpintr = BOOL;
+timer = BOOL;
+
+icache = BOOL;
+icachetest = BOOL;
+icachelock = BOOL;
+dcache = BOOL;
+dcachetest = BOOL;
+dcachelock = BOOL;
+ecc = BOOL;
+
+cacheattr = BOOL;
+tlb = BOOL;
+mmu = BOOL;
+
+window = BOOL;
+miscsr = BOOL;
+threadptr = BOOL;
+prid = BOOL;
+debug = BOOL;
+ocd = BOOL;
+traceport = BOOL;
+
+simulator = BOOL;
+
+%parts
+
+ureg;
+
+%bitfields
+
+r = 12:15;
+s = 8:11;
+t = 4:7;
+
+%operands
+
+ar = $a(r);
+as = $a(s);
+at = $a(t);
+
+br = $b(r);
+bs = $b(s);
+bt = $b(t);
+bsq = $b(s Q);
+bso = $b(s O);
+
+fr = $f(r);
+fs = $f(s);
+ft = $f(t);
+
+mw = $m(12:13);
+my = $m(6 +2);
+mx = $m(14);
+
+btarg8 = IMM(16:23 S PCREL +4 BT);
+btarg12 = IMM(12:23 S PCREL +4 BT);
+btarg6 = IMM(12:15 4:5 PCREL +4 BT);
+ltarg = IMM(16:23 PCREL +4 BT);
+jtarg = IMM(6:23 S PCREL +4 BT);
+ctarg = IMM(6:23 S <<2 PCREL(&-4) +4 CT);
+
+b4const = [r] {
+	0x0: -1,
+	0x1: 1,
+	0x2: 2,
+	0x3: 3,
+	0x4: 4,
+	0x5: 5,
+	0x6: 6,
+	0x7: 7,
+	0x8: 8,
+	0x9: 10,
+	0xa: 12,
+	0xb: 16,
+	0xc: 32,
+	0xd: 64,
+	0xe: 128,
+	0xf: 256,
+};
+
+b4constu = [r] {
+	0x0: 0x8000,
+	0x1: 0x10000,
+	0x2: 2,
+	0x3: 3,
+	0x4: 4,
+	0x5: 5,
+	0x6: 6,
+	0x7: 7,
+	0x8: 8,
+	0x9: 10,
+	0xa: 12,
+	0xb: 16,
+	0xc: 32,
+	0xd: 64,
+	0xe: 128,
+	0xf: 256,
+};
+
+slli_shift = [4:7 20] {
+	0x01: 31,
+	0x02: 30,
+	0x03: 29,
+	0x04: 28,
+	0x05: 27,
+	0x06: 26,
+	0x07: 25,
+	0x08: 24,
+	0x09: 23,
+	0x0a: 22,
+	0x0b: 21,
+	0x0c: 20,
+	0x0d: 19,
+	0x0e: 18,
+	0x0f: 17,
+	0x10: 16,
+	0x11: 15,
+	0x12: 14,
+	0x13: 13,
+	0x14: 12,
+	0x15: 11,
+	0x16: 10,
+	0x17: 9,
+	0x18: 8,
+	0x19: 7,
+	0x1a: 6,
+	0x1b: 5,
+	0x1c: 4,
+	0x1d: 3,
+	0x1e: 2,
+	0x1f: 1,
+};
+
+data8 = MEM(as + IMM(16:23));
+data16 = MEM(as + IMM(16:23 << 1));
+data32 = MEM(as + IMM(16:23 << 2));
+data32pi = MEM(as += IMM(16:23 << 2));
+datacl = MEM(as + IMM(20:23 << 4));
+data32e = MEM(as + IMM(12:15 US << 2));
+data32n = MEM(as + IMM(12:15 << 2));
+data32r = MEM(IMM(8:15 US << 2 PCREL(+3 &-4)) LIT); // XXX: doesn't work with extended l32r option.
+datarr = MEM(as + at);
+datarrpi = MEM(as += at);
+
+addin_imm = [t] {
+	0: -1,
+	1-0xf: IMM(t),
+};
+
+ureg = [ureg] {
+[threadptr]	0xe7: $threadptr,
+[float]		0xe8: $fcr,
+[float]		0xe9: $fsr,
+		-: $u(ureg UNK),
+};
+
+sreg = [8:15] {
+[loop]		0x00: $lbeg,
+[loop]		0x01: $lend,
+[loop]		0x02: $lcount,
+		0x03: $sar,
+[boolean]	0x04: $br,
+[el32r]		0x05: $litbase,
+[condstore]	0x0c: $scompare1
+[mac16]		0x10: $acclo,
+[mac16]		0x11: $acchi,
+[mac16]		0x20-0x23: $m(8:9),
+[window]	0x48: $windowbase,
+[window]	0x49: $windowstart,
+[mmu]		0x53: $ptevaddr,
+[traceport]	0x59: $mmid,
+[mmu]		0x5a: $rasid,
+[mmu]		0x5b: $itlbcfg,
+[mmu]		0x5c: $dtlbcfg,
+[debug]		0x60: $ibreakenable,
+[cacheattr]	0x62: $cacheattr,
+[condstore]	0x63: $atomctl,
+[ocd]		0x68: $ddr,
+[ecc]		0x6a: $mepc,
+[ecc]		0x6b: $meps,
+[ecc]		0x6c: $mesave,
+[ecc]		0x6d: $mesr,
+[ecc]		0x6e: $mecr,
+[ecc]		0x6f: $mevaddr,
+[debug]		0x80-0x81: $ibreaka(8),
+[debug]		0x90-0x91: $dbreaka(8),
+[debug]		0xa0-0xa1: $dbreakc(8),
+[exception]	0xb1: $epc1,
+[hpintr]	0xb2-0xb7: $epc(8:11),
+[exception]	0xc0: $depc,
+[hpintr]	0xc2-0xc7: $eps(8:11),
+[exception]	0xd1: $excsave1,
+[hpintr]	0xd2-0xd7: $excsave(8:11),
+[coproc]	0xe0: $cpenable,
+[interrupt]	0xe2: $interrupt,
+[interrupt]	0xe2: $intset,
+[interrupt]	0xe3: $intclear,
+[interrupt]	0xe4: $intenable,
+[exception]	0xe6: $ps,
+[relocexc]	0xe7: $vecbase,
+[exception]	0xe8: $exccause,
+[debug]		0xe9: $debugcause,
+[timer]		0xea: $ccount,
+[prid]		0xeb: $prid,
+[debug]		0xec: $icount,
+[debug]		0xed: $icountlevel,
+[exception]	0xee: $excvaddr,
+[timer]		0xf0-0xf2: $ccompare(8:9),
+[miscsr]	0xf4-0xf7: $misc(8:9),
+		-: $s(8:15 UNK),
+};
+
+%instructions
+
+ilong = {
+[exception]	0x000000/0xffffff: "ill",
+		0x000080/0xffffff: "ret" ENDMARK,
+[window]	0x000090/0xffffff: "retw" ENDMARK,
+		0x0000a0/0xfff0ff: "jx" as ENDMARK,
+		0x0000c0/0xfff0ff: "callx0" as,
+[window]	0x0000d0/0xfff0ff: "callx4" as,
+[window]	0x0000e0/0xfff0ff: "callx8" as,
+[window]	0x0000f0/0xfff0ff: "callx12" as,
+[window]	0x001000/0xfff00f: "movsp" at as,
+		0x002000/0xffffff: "isync",
+		0x002010/0xffffff: "rsync",
+		0x002020/0xffffff: "esync",
+		0x002030/0xffffff: "dsync",
+[exception]	0x002080/0xffffff: "excw",
+		0x0020c0/0xffffff: "memw",
+		0x0020d0/0xffffff: "extw",
+		0x0020f0/0xffffff: "nop",
+[exception]	0x003000/0xffffff: "rfe" ENDMARK,
+[exception]	0x003100/0xffffff: "rfue" ENDMARK,
+[exception]	0x003200/0xffffff: "rfde" ENDMARK,
+[window]	0x003400/0xffffff: "rfwo" ENDMARK,
+[window]	0x003500/0xffffff: "rfwu" ENDMARK,
+[hpintr]	0x003010/0xfff0ff: "rfi" IMM(8:11) ENDMARK,
+[ecc]		0x003020/0xffffff: "rfme" ENDMARK,
+[debug]		0x004000/0xfff00f: "break" IMM(8:11) IMM(4:7),
+[exception]	0x005000/0xffffff: "syscall",
+[simulator]	0x005100/0xffffff: "simcall",
+[interrupt]	0x006000/0xfff00f: "rsil" at IMM(8:11),
+[interrupt]	0x007000/0xfff0ff: "waiti" IMM(8:11),
+[boolean]	0x008000/0xfff00f: "any4" bt bsq,
+[boolean]	0x009000/0xfff00f: "all4" bt bsq,
+[boolean]	0x00a000/0xfff00f: "any8" bt bso,
+[boolean]	0x00b000/0xfff00f: "all8" bt bso,
+		0x100000/0xff000f: "and" ar as at,
+		0x200000/0xff000f: "or" ar as at,
+		0x300000/0xff000f: "xor" ar as at,
+		0x400000/0xfff0ff: "ssr" as,
+		0x401000/0xfff0ff: "ssl" as,
+		0x402000/0xfff0ff: "ssa8l" as,
+		0x403000/0xfff0ff: "ssa8b" as,
+		0x404000/0xfff0ef: "ssai" IMM(8:11 4),
+		0x406000/0xfff00f: "rer" at as,
+		0x407000/0xfff00f: "wer" at as,
+[window]	0x408000/0xffff0f: "rotw" IMM(4:7 S),
+[nsa]		0x40e000/0xfff00f: "nsa" at as,
+[nsa]		0x40f000/0xfff00f: "nsau" at as,
+[tlb]		0x503000/0xfff00f: "ritlb0" at as,
+[tlb]		0x504000/0xfff0ff: "iitlb" as,
+[tlb]		0x505000/0xfff00f: "pitlb" at as,
+[tlb]		0x506000/0xfff00f: "witlb" at as,
+[tlb]		0x507000/0xfff00f: "ritlb1" at as,
+[tlb]		0x50b000/0xfff00f: "rdtlb0" at as,
+[tlb]		0x50c000/0xfff0ff: "idtlb" as,
+[tlb]		0x50d000/0xfff00f: "pdtlb" at as,
+[tlb]		0x50e000/0xfff00f: "wdtlb" at as,
+[tlb]		0x50f000/0xfff00f: "rdtlb1" at as,
+		0x600000/0xff0f0f: "neg" ar at,
+		0x600100/0xff0f0f: "abs" ar at,
+		0x800000/0xff000f: "add" ar as at,
+		0x900000/0xff000f: "addx2" ar as at,
+		0xa00000/0xff000f: "addx4" ar as at,
+		0xb00000/0xff000f: "addx8" ar as at,
+		0xc00000/0xff000f: "sub" ar as at,
+		0xd00000/0xff000f: "subx2" ar as at,
+		0xe00000/0xff000f: "subx4" ar as at,
+		0xf00000/0xff000f: "subx8" ar as at,
+		0x010000/0xef000f: "slli" ar as slli_shift,
+		0x210000/0xef000f: "srai" ar at IMM(8:11 20),
+		0x410000/0xff000f: "srli" ar at IMM(8:11),
+		0x610000/0xff000f: "xsr" at sreg,
+		0x810000/0xff000f: "src" ar as at,
+		0x910000/0xff0f0f: "srl" ar at,
+		0xa10000/0xff00ff: "sll" ar as,
+		0xb10000/0xff0f0f: "sra" ar at,
+[mul16]		0xc10000/0xff000f: "mul16u" ar as at,
+[mul16]		0xd10000/0xff000f: "mul16s" ar as at,
+[icachetest]	0xf10000/0xfff00f: "lict" at as,
+[icachetest]	0xf11000/0xfff00f: "sict" at as,
+[icachetest]	0xf12000/0xfff00f: "licw" at as,
+[icachetest]	0xf13000/0xfff00f: "sicw" at as,
+[dcachetest]	0xf18000/0xfff00f: "ldct" at as,
+[dcachetest]	0xf19000/0xfff00f: "sdct" at as,
+[ocd]		0xf1e000/0xffffff: "rfdo",
+[ocd]		0xf1e010/0xfffeff: "rfdd", // XXX
+[boolean]	0x020000/0xff000f: "andb" br bs bt,
+[boolean]	0x120000/0xff000f: "andbc" br bs bt,
+[boolean]	0x220000/0xff000f: "orb" br bs bt,
+[boolean]	0x320000/0xff000f: "orbc" br bs bt,
+[boolean]	0x420000/0xff000f: "xorb" br bs bt,
+[mul32]		0x820000/0xff000f: "mull" ar as at,
+[mul32]		0xa20000/0xff000f: "muluh" ar as at,
+[mul32]		0xb20000/0xff000f: "mulsh" ar as at,
+[div32]		0xc20000/0xff000f: "quou" ar as at,
+[div32]		0xd20000/0xff000f: "quos" ar as at,
+[div32]		0xe20000/0xff000f: "remu" ar as at,
+[div32]		0xf20000/0xff000f: "rems" ar as at,
+		0x030000/0xff000f: "rsr" at sreg,
+		0x130000/0xff000f: "wsr" at sreg,
+[sext]		0x230000/0xff000f: "sext" ar as IMM(4:7 +7),
+[clamps]	0x330000/0xff000f: "clamps" ar as IMM(4:7 +7),
+[minmax]	0x430000/0xff000f: "min" ar as at,
+[minmax]	0x530000/0xff000f: "max" ar as at,
+[minmax]	0x630000/0xff000f: "minu" ar as at,
+[minmax]	0x730000/0xff000f: "maxu" ar as at,
+		0x830000/0xff000f: "moveqz" ar as at,
+		0x930000/0xff000f: "movnez" ar as at,
+		0xa30000/0xff000f: "movltz" ar as at,
+		0xb30000/0xff000f: "movgez" ar as at,
+[boolean]	0xc30000/0xff000f: "movf" ar as bt,
+[boolean]	0xd30000/0xff000f: "movt" ar as bt,
+		0xe30000/0xff000f: "rur" ar [ureg <- 4:11] ureg,
+		0xf30000/0xff000f: "wur" at [ureg <- 8:15] ureg,
+		0x040000/0x0e000f: "extui" ar at IMM(8:11 16) IMM(20:23 +1),
+[float]		0x080000/0xff000f: "lsx" fr datarr,
+[float]		0x180000/0xff000f: "lsxu" fr datarrpi,
+[float]		0x480000/0xff000f: "ssx" fr datarr,
+[float]		0x580000/0xff000f: "ssxu" fr datarrpi,
+[window]	0x090000/0xff000f: "l32e" at data32e,
+[window]	0x490000/0xff000f: "s32e" at data32e,
+[float]		0x0a0000/0xff000f: "add.s" fr fs ft,
+[float]		0x1a0000/0xff000f: "sub.s" fr fs ft,
+[float]		0x2a0000/0xff000f: "mul.s" fr fs ft,
+[float]		0x4a0000/0xff000f: "madd.s" fr fs ft,
+[float]		0x5a0000/0xff000f: "msub.s" fr fs ft,
+[float]		0x8a0000/0xff000f: "round.s" ar fs IMM(t),
+[float]		0x9a0000/0xff000f: "trunc.s" ar fs IMM(t),
+[float]		0xaa0000/0xff000f: "floor.s" ar fs IMM(t),
+[float]		0xba0000/0xff000f: "ceil.s" ar fs IMM(t),
+[float]		0xca0000/0xff000f: "float.s" fr as IMM(t),
+[float]		0xda0000/0xff000f: "ufloat.s" fr as IMM(t),
+[float]		0xea0000/0xff000f: "utrunc.s" ar fs IMM(t),
+[float]		0xfa0000/0xff00ff: "mov.s" fr fs,
+[float]		0xfa0010/0xff00ff: "abs.s" fr fs,
+[float]		0xfa0040/0xff00ff: "rfr" ar fs,
+[float]		0xfa0050/0xff00ff: "wfr" fr as,
+[float]		0xfa0060/0xff00ff: "neg.s" fr fs,
+[float]		0x1b0000/0xff000f: "un.s" br fs ft,
+[float]		0x2b0000/0xff000f: "oeq.s" br fs ft,
+[float]		0x3b0000/0xff000f: "ueq.s" br fs ft,
+[float]		0x4b0000/0xff000f: "olt.s" br fs ft,
+[float]		0x5b0000/0xff000f: "ult.s" br fs ft,
+[float]		0x6b0000/0xff000f: "ole.s" br fs ft,
+[float]		0x7b0000/0xff000f: "ule.s" br fs ft,
+[float]		0x8b0000/0xff000f: "moveqz.s" fr fs at,
+[float]		0x9b0000/0xff000f: "movnez.s" fr fs at,
+[float]		0xab0000/0xff000f: "movltz.s" fr fs at,
+[float]		0xbb0000/0xff000f: "movgez.s" fr fs at,
+[float]		0xcb0000/0xff000f: "movf.s" fr fs bt,
+[float]		0xdb0000/0xff000f: "movt.s" fr fs bt,
+		0x000001/0x00000f: "l32r" at data32r,
+		0x000002/0x00f00f: "l8ui" at data8,
+		0x001002/0x00f00f: "l16ui" at data16,
+		0x002002/0x00f00f: "l32i" at data32,
+		0x004002/0x00f00f: "s8i" at data8,
+		0x005002/0x00f00f: "s16i" at data16,
+		0x006002/0x00f00f: "s32i" at data32,
+[dcache]	0x007002/0x00f0ff: "dpfr" data32,
+[dcache]	0x007012/0x00f0ff: "dpfw" data32,
+[dcache]	0x007022/0x00f0ff: "dpfro" data32,
+[dcache]	0x007032/0x00f0ff: "dpfwo" data32,
+[dcache]	0x007042/0x00f0ff: "dhwb" data32,
+[dcache]	0x007052/0x00f0ff: "dhwbi" data32,
+[dcache]	0x007062/0x00f0ff: "dhi" data32,
+[dcache]	0x007072/0x00f0ff: "dii" data32,
+[dcachelock]	0x007082/0x0ff0ff: "dpfl" datacl,
+[dcachelock]	0x027082/0x0ff0ff: "dhu" datacl,
+[dcachelock]	0x037082/0x0ff0ff: "diu" datacl,
+[dcache]	0x047082/0x0ff0ff: "diwb" datacl,
+[dcache]	0x057082/0x0ff0ff: "diwbi" datacl,
+[icache]	0x0070c2/0x00f0ff: "ipf" data32,
+[icachelock]	0x0070d2/0x0ff0ff: "ipfl" datacl,
+[icachelock]	0x0270d2/0x0ff0ff: "ihu" datacl,
+[icachelock]	0x0370d2/0x0ff0ff: "iiu" datacl,
+[icache]	0x0070e2/0x00f0ff: "ihi" data32,
+[icache]	0x0070f2/0x00f0ff: "iii" data32,
+		0x009002/0x00f00f: "l16si" at data16,
+		0x00a002/0x00f00f: "movi" at IMM(16:23 8:11 S),
+[mpsync]	0x00b002/0x00f00f: "l32ai" at data32,
+		0x00c002/0x00f00f: "addi" at as IMM(16:23 S),
+		0x00d002/0x00f00f: "addmi" at as IMM(16:23 <<8 S),
+[condstore]	0x00e002/0x00f00f: "s32c1i" at data32,
+[mpsync]	0x00f002/0x00f00f: "s32ri" at data32,
+[float]		0x000003/0x00f00f: "lsi" ft data32,
+[float]		0x004003/0x00f00f: "ssi" ft data32,
+[float]		0x008003/0x00f00f: "lsiu" ft data32pi,
+[float]		0x00c003/0x00f00f: "ssiu" ft data32pi,
+[mac16]		0x080004/0xff80bf: "mula.dd.ll.ldinc" mw as mx my,
+[mac16]		0x090004/0xff80bf: "mula.dd.hl.ldinc" mw as mx my,
+[mac16]		0x0a0004/0xff80bf: "mula.dd.lh.ldinc" mw as mx my,
+[mac16]		0x0b0004/0xff80bf: "mula.dd.hh.ldinc" mw as mx my,
+[mac16]		0x180004/0xff80bf: "mula.dd.ll.lddec" mw as mx my,
+[mac16]		0x190004/0xff80bf: "mula.dd.hl.lddec" mw as mx my,
+[mac16]		0x1a0004/0xff80bf: "mula.dd.lh.lddec" mw as mx my,
+[mac16]		0x1b0004/0xff80bf: "mula.dd.hh.lddec" mw as mx my,
+[mac16]		0x240004/0xffbfbf: "mul.dd.ll" mx my,
+[mac16]		0x250004/0xffbfbf: "mul.dd.hl" mx my,
+[mac16]		0x260004/0xffbfbf: "mul.dd.lh" mx my,
+[mac16]		0x270004/0xffbfbf: "mul.dd.hh" mx my,
+[mac16]		0x280004/0xffbfbf: "mula.dd.ll" mx my,
+[mac16]		0x290004/0xffbfbf: "mula.dd.hl" mx my,
+[mac16]		0x2a0004/0xffbfbf: "mula.dd.lh" mx my,
+[mac16]		0x2b0004/0xffbfbf: "mula.dd.hh" mx my,
+[mac16]		0x2c0004/0xffbfbf: "muls.dd.ll" mx my,
+[mac16]		0x2d0004/0xffbfbf: "muls.dd.hl" mx my,
+[mac16]		0x2e0004/0xffbfbf: "muls.dd.lh" mx my,
+[mac16]		0x2f0004/0xffbfbf: "muls.dd.hh" mx my,
+[mac16]		0x340004/0xfff0bf: "mul.ad.ll" as my,
+[mac16]		0x350004/0xfff0bf: "mul.ad.hl" as my,
+[mac16]		0x360004/0xfff0bf: "mul.ad.lh" as my,
+[mac16]		0x370004/0xfff0bf: "mul.ad.hh" as my,
+[mac16]		0x380004/0xfff0bf: "mula.ad.ll" as my,
+[mac16]		0x390004/0xfff0bf: "mula.ad.hl" as my,
+[mac16]		0x3a0004/0xfff0bf: "mula.ad.lh" as my,
+[mac16]		0x3b0004/0xfff0bf: "mula.ad.hh" as my,
+[mac16]		0x3c0004/0xfff0bf: "muls.ad.ll" as my,
+[mac16]		0x3d0004/0xfff0bf: "muls.ad.hl" as my,
+[mac16]		0x3e0004/0xfff0bf: "muls.ad.lh" as my,
+[mac16]		0x3f0004/0xfff0bf: "muls.ad.hh" as my,
+[mac16]		0x480004/0xff800f: "mula.da.ll.ldinc" mw as mx at,
+[mac16]		0x490004/0xff800f: "mula.da.hl.ldinc" mw as mx at,
+[mac16]		0x4a0004/0xff800f: "mula.da.lh.ldinc" mw as mx at,
+[mac16]		0x4b0004/0xff800f: "mula.da.hh.ldinc" mw as mx at,
+[mac16]		0x580004/0xff800f: "mula.da.ll.lddec" mw as mx at,
+[mac16]		0x590004/0xff800f: "mula.da.hl.lddec" mw as mx at,
+[mac16]		0x5a0004/0xff800f: "mula.da.lh.lddec" mw as mx at,
+[mac16]		0x5b0004/0xff800f: "mula.da.hh.lddec" mw as mx at,
+[mac16]		0x640004/0xffbf0f: "mul.da.ll" mx at,
+[mac16]		0x650004/0xffbf0f: "mul.da.hl" mx at,
+[mac16]		0x660004/0xffbf0f: "mul.da.lh" mx at,
+[mac16]		0x670004/0xffbf0f: "mul.da.hh" mx at,
+[mac16]		0x680004/0xffbf0f: "mula.da.ll" mx at,
+[mac16]		0x690004/0xffbf0f: "mula.da.hl" mx at,
+[mac16]		0x6a0004/0xffbf0f: "mula.da.lh" mx at,
+[mac16]		0x6b0004/0xffbf0f: "mula.da.hh" mx at,
+[mac16]		0x6c0004/0xffbf0f: "muls.da.ll" mx at,
+[mac16]		0x6d0004/0xffbf0f: "muls.da.hl" mx at,
+[mac16]		0x6e0004/0xffbf0f: "muls.da.lh" mx at,
+[mac16]		0x6f0004/0xffbf0f: "muls.da.hh" mx at,
+[mac16]		0x700004/0xfff00f: "umul.aa.ll" as at,
+[mac16]		0x710004/0xfff00f: "umul.aa.hl" as at,
+[mac16]		0x720004/0xfff00f: "umul.aa.lh" as at,
+[mac16]		0x730004/0xfff00f: "umul.aa.hh" as at,
+[mac16]		0x740004/0xfff00f: "mul.aa.ll" as at,
+[mac16]		0x750004/0xfff00f: "mul.aa.hl" as at,
+[mac16]		0x760004/0xfff00f: "mul.aa.lh" as at,
+[mac16]		0x770004/0xfff00f: "mul.aa.hh" as at,
+[mac16]		0x780004/0xfff00f: "mula.aa.ll" as at,
+[mac16]		0x790004/0xfff00f: "mula.aa.hl" as at,
+[mac16]		0x7a0004/0xfff00f: "mula.aa.lh" as at,
+[mac16]		0x7b0004/0xfff00f: "mula.aa.hh" as at,
+[mac16]		0x7c0004/0xfff00f: "muls.aa.ll" as at,
+[mac16]		0x7d0004/0xfff00f: "muls.aa.hl" as at,
+[mac16]		0x7e0004/0xfff00f: "muls.aa.lh" as at,
+[mac16]		0x7f0004/0xfff00f: "muls.aa.hh" as at,
+[mac16]		0x800004/0xffc0ff: "ldinc" mw as, // XXX: nice mem argument?
+[mac16]		0x900004/0xffc0ff: "lddec" mw as,
+		0x000005/0x00003f: "call0" ctarg,
+[window]	0x000015/0x00003f: "call4" ctarg,
+[window]	0x000025/0x00003f: "call8" ctarg,
+[window]	0x000035/0x00003f: "call12" ctarg,
+		0x000006/0x00003f: "j" jtarg ENDMARK,
+		0x000016/0x0000ff: "beqz" as btarg12,
+		0x000056/0x0000ff: "bnez" as btarg12,
+		0x000096/0x0000ff: "bltz" as btarg12,
+		0x0000d6/0x0000ff: "bgez" as btarg12,
+		0x000026/0x0000ff: "beqi" as b4const btarg8,
+		0x000066/0x0000ff: "bnei" as b4const btarg8,
+		0x0000a6/0x0000ff: "blti" as b4const btarg8,
+		0x0000e6/0x0000ff: "bgei" as b4const btarg8,
+[window]	0x000036/0x0000ff: "entry" as IMM(12:23 << 3),
+[boolean]	0x000076/0x00f0ff: "bf" bs btarg8,
+[boolean]	0x001076/0x00f0ff: "bt" bs btarg8,
+[loop]		0x008076/0x00f0ff: "loop" as ltarg,
+[loop]		0x009076/0x00f0ff: "loopnez" as ltarg,
+[loop]		0x00a076/0x00f0ff: "loopgtz" as ltarg,
+		0x0000b6/0x0000ff: "bltui" as b4constu btarg8,
+		0x0000f6/0x0000ff: "bgeui" as b4constu btarg8,
+		0x000007/0x00f00f: "bnone" as at btarg8,
+		0x001007/0x00f00f: "beq" as at btarg8,
+		0x002007/0x00f00f: "blt" as at btarg8,
+		0x003007/0x00f00f: "bltu" as at btarg8,
+		0x004007/0x00f00f: "ball" as at btarg8,
+		0x005007/0x00f00f: "bbc" as at btarg8,
+		0x006007/0x00e00f: "bbci" as IMM(4:7 12) btarg8,
+		0x008007/0x00f00f: "bany" as at btarg8,
+		0x009007/0x00f00f: "bne" as at btarg8,
+		0x00a007/0x00f00f: "bge" as at btarg8,
+		0x00b007/0x00f00f: "bgeu" as at btarg8,
+		0x00c007/0x00f00f: "bnall" as at btarg8,
+		0x00d007/0x00f00f: "bbs" as at btarg8,
+		0x00e007/0x00e00f: "bbsi" as IMM(4:7 12) btarg8,
+};
+
+ishort = {
+		0x0008/0x000f: "l32i.n" at data32n,
+		0x0009/0x000f: "s32i.n" at data32n,
+		0x000a/0x000f: "add.n" ar as at,
+		0x000b/0x000f: "addi.n" ar as addin_imm,
+		0x000c/0x008f: "movi.n" as IMM(12:15 4:6 SS),
+		0x008c/0x00cf: "beqz.n" as btarg6,
+		0x00cc/0x00cf: "bnez.n" as btarg6,
+		0x000d/0xf00f: "mov.n" at as,
+		0xf00d/0xffff: "ret.n" ENDMARK,
+[window]	0xf01d/0xffff: "retw.n" ENDMARK,
+[debug]		0xf02d/0xf0ff: "break.n" IMM(8:11),
+		0xf03d/0xffff: "nop.n",
+[exception]	0xf06d/0xffff: "ill.n",
+};
+
+
+%forms
+
+root = [3] {
+		0: 24 ilong,
+[density]	1: 16 ishort,
+};

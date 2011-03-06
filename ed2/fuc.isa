@@ -155,7 +155,7 @@ bpred = [8:12] {
 	0x0b: "e",
 	0x0c: "a",
 	0x0d: "na",
-	0x0e: -,
+	0x0e: ENDMARK,
 	0x10: "np0",
 	0x11: "np1",
 	0x12: "np2",
@@ -404,7 +404,7 @@ opf4 = [8:13] {
 	0x00/0x38: "bra" pred1 srbtarg,
 	0x10/0x38: "bra" "not" pred1 srbtarg,
 	0x00/0x20: "bra" bpred srbtarg,
-	0x20: "bra" sabtarg,
+	0x20: "bra" sabtarg ENDMARK,
 	0x21: "call" sactarg,
 	0x28: "sleep" flag,
 	0x30: "add" $sp imm8s,
@@ -419,7 +419,7 @@ opf5 = [8:13] {
 	0x00/0x38: "bra" pred1 lrbtarg,
 	0x10/0x38: "bra" "not" pred1 lrbtarg,
 	0x00/0x20: "bra" bpred lrbtarg,
-	0x20: "bra" labtarg,
+	0x20: "bra" labtarg ENDMARK,
 	0x21: "call" lactarg,
 	0x30: "add" $sp imm8s,
 	0x3c: { [26:31] {
@@ -449,9 +449,9 @@ opf5 = [8:13] {
 };
 
 opf8 = [8:11] {
-	0x0: "ret",
-	0x1: "iret",
-	0x2: "exit",
+	0x0: "ret" ENDMARK,
+	0x1: "iret" ENDMARK,
+	0x2: "exit" ENDMARK,
 	0x3: "xdwait",
 	0x6: UNK,
 	0x7: "xcwait",
@@ -527,6 +527,23 @@ opff = [16:19] {
 
 %forms
 
+sized = [0:5] {
+	0x00/0x30:	24 op0x,
+	0x10/0x30:	24 op1x,
+	0x20/0x30:	32 op2x,
+	0x30:		24 op30,
+	0x31:		32 op31,
+	0x34:		24 op34,
+	0x36:		24 op36,
+	0x37:		32 op37,
+	0x38:		24 op38,
+	0x39:		24 op39,
+	0x3a:		24 op3a,
+	0x3b:		24 op3b,
+	0x3c:		24 op3c,
+	0x3d:		16 op3d,
+};
+
 root = [0:7] {
 	0x00/0xc0:	sized,
 	0x40/0xc0:	sized,
@@ -546,21 +563,4 @@ root = [0:7] {
 	0xfd:		24 opfd,
 	0xfe:		24 opfe,
 	0xff:		24 opff,
-};
-
-sized = [0:5] {
-	0x00/0x30:	24 op0x,
-	0x10/0x30:	24 op1x,
-	0x20/0x30:	32 op2x,
-	0x30:		24 op30,
-	0x31:		32 op31,
-	0x34:		24 op34,
-	0x36:		24 op36,
-	0x37:		32 op37,
-	0x38:		24 op38,
-	0x39:		24 op39,
-	0x3a:		24 op3a,
-	0x3b:		24 op3b,
-	0x3c:		24 op3c,
-	0x3d:		16 op3d,
 };
