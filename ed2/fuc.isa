@@ -38,7 +38,7 @@ sreg = [sr] {
 	0x9: $cx,
 	0xa: $cauth,
 	0xb: $xtargets,
-	0xc [NVA3:]: $tstatus,
+[NVA3:]	0xc: $tstatus,
 	-: $s(sr UNK),
 };
 sreg1 = [sr <- 8:11] sreg;
@@ -169,10 +169,10 @@ bpred = [8:12] {
 	0x1a: "ns",
 	0x1b: "nz",
 	0x1b: "ne",
-	0x1c [NVA3:]: "g",
-	0x1d [NVA3:]: "le",
-	0x1e [NVA3:]: "l",
-	0x1f [NVA3:]: "ge",
+[NVA3:]	0x1c: "g",
+[NVA3:]	0x1d: "le",
+[NVA3:]	0x1e: "l",
+[NVA3:]	0x1f: "ge",
 };
 
 
@@ -209,14 +209,14 @@ op30 = [8:11] {
 	0x1: "st" size dataspi reg1,
 	0x4: "cmpu" size reg2 imm8a,
 	0x5: "cmps" size reg2 imm8as,
-	0x6 [NVA3:]: "cmp" size reg2 imm8as,
+[NVA3:]	0x6: "cmp" size reg2 imm8as,
 	-: UNK size reg2 imm8a,
 };
 
 op31 = [8:11] {
 	0x4: "cmpu" size reg2 imm16a,
 	0x5: "cmps" size reg2 imm16as,
-	0x6 [NVA3:]: "cmp" size reg2 imm16as,
+[NVA3:]	0x6: "cmp" size reg2 imm16as,
 	-: UNK size reg2 imm16a,
 };
 
@@ -251,15 +251,15 @@ op38 = [16:19] {
 	0x1: "st" size dataspr reg2,
 	0x4: "cmpu" size reg2 reg1,
 	0x5: "cmps" size reg2 reg1,
-	0x6 [NVA3:]: "cmp" size reg2 reg1,
+[NVA3:]	0x6: "cmp" size reg2 reg1,
 	-: UNK size reg2 reg1,
 };
 
 op39 = [16:19] {
 	0x0: "not" size reg1 reg2,
 	0x1: "neg" size reg1 reg2,
-	0x2 [NV98]: "movf" size reg1 reg2,
-	0x2 [NVA3:]: "mov" size reg1 reg2,
+[NV98]	0x2: "movf" size reg1 reg2,
+[NVA3:]	0x2: "mov" size reg1 reg2,
 	0x3: "hswap" size reg1 reg2,
 	-: UNK size reg1 reg2,
 };
@@ -299,11 +299,11 @@ op3c = [16:19] {
 op3d = [8:11] {
 	0x0: "not" size reg2,
 	0x1: "neg" size reg2,
-	0x2 [NV98]: "movf" size reg2,
-	0x2 [NVA3:]: "mov" size reg2,
+[NV98]	0x2: "movf" size reg2,
+[NVA3:]	0x2: "mov" size reg2,
 	0x3: "hswap" size reg2,
 	0x4: "clear" size reg2,
-	0x5 [NVA3:]: "setf" size reg2,
+[NVA3:]	0x5: "setf" size reg2,
 	-: UNK size reg2,
 };
 
@@ -311,15 +311,15 @@ opcx = [0:3] {
 	0x0: "mulu" reg1 reg2 imm8,
 	0x1: "muls" reg1 reg2 imm8s,
 	0x2: "sex" reg1 reg2 imm8,
-	0x3 [NVA3:]: "extrs" reg1 reg2 bitf8,
+[NVA3:]	0x3: "extrs" reg1 reg2 bitf8,
 	0x4: "and" reg1 reg2 imm8,
 	0x5: "or" reg1 reg2 imm8,
 	0x6: "xor" reg1 reg2 imm8,
-	0x7 [NVA3:]: "extr" reg1 reg2 bitf8,
+[NVA3:]	0x7: "extr" reg1 reg2 bitf8,
 	0x8: "xbit" reg1 reg2 imm8,
-	0xb [NVA3:]: "ins" reg1 reg2 bitf8,
-	0xc [NVA3:]: "div" reg1 reg2 imm8,
-	0xd [NVA3:]: "mod" reg1 reg2 imm8,
+[NVA3:]	0xb: "ins" reg1 reg2 bitf8,
+[NVA3:]	0xc: "div" reg1 reg2 imm8,
+[NVA3:]	0xd: "mod" reg1 reg2 imm8,
 	0xe: UNK reg1 iori,
 	0xf: "iord" reg1 iori,
 	-: UNK reg1 reg2 imm8,
@@ -327,21 +327,21 @@ opcx = [0:3] {
 
 opdx = [0:3] {
 	0x0: "iowr" iori reg1,
-	0x0 [NVA3+]: "iowrs" iori reg1,
+[NVA3:]	0x1: "iowrs" iori reg1,
 	-: UNK reg1 reg2 imm8,
 };
 
 opex = [0:3] {
 	0x0: "mulu" reg1 reg2 imm16,
 	0x1: "muls" reg1 reg2 imm16s,
-	0x3 [NVA3:]: "extrs" reg1 reg2 bitf16,
+[NVA3:]	0x3: "extrs" reg1 reg2 bitf16,
 	0x4: "and" reg1 reg2 imm16,
 	0x5: "or" reg1 reg2 imm16,
 	0x6: "xor" reg1 reg2 imm16,
-	0x7 [NVA3:]: "extr" reg1 reg2 bitf16,
-	0xb [NVA3:]: "ins" reg1 reg2 bitf16,
-	0xc [NVA3:]: "div" reg1 reg2 imm16,
-	0xd [NVA3:]: "mod" reg1 reg2 imm16,
+[NVA3:]	0x7: "extr" reg1 reg2 bitf16,
+[NVA3:]	0xb: "ins" reg1 reg2 bitf16,
+[NVA3:]	0xc: "div" reg1 reg2 imm16,
+[NVA3:]	0xd: "mod" reg1 reg2 imm16,
 	-: UNK reg1 reg2 imm16,
 };
 
@@ -455,7 +455,7 @@ opf8 = [8:11] {
 	0x3: "xdwait",
 	0x6: UNK,
 	0x7: "xcwait",
-	0x8/0xc [NVA3:]: "trap" IMM(8:9),
+[NVA3:]	0x8/0xc: "trap" IMM(8:9),
 	-: UNK,
 };
 
@@ -464,7 +464,7 @@ opf9 = [8:11] {
 	0x1: "add" $sp reg2,
 	0x4: "bra" reg2,
 	0x5: "call" reg2,
-	0x8 [NVA3:]: "itlb" reg2,
+[NVA3:]	0x8: "itlb" reg2,
 	0x9: "bset" $flags reg2,
 	0xa: "bclr" $flags reg2,
 	0xb: "btgl" $flags reg2,
@@ -473,7 +473,7 @@ opf9 = [8:11] {
 
 opfa = [16:19] {
 	0x0: "iowr" ior reg1,
-	0x1 [NVA3:]: "iowrs" ior reg1,
+[NVA3:]	0x1: "iowrs" ior reg1,
 	0x4: "xcld" reg2 reg1,
 	0x5: "xdld" reg2 reg1,
 	0x6: "xdst" reg2 reg1,
@@ -502,8 +502,8 @@ opfd = [16:19] {
 opfe = [16:19] {
 	0x0: "mov" sreg1 reg2,
 	0x1: "mov" reg1 sreg2,
-	0x2 [NVA3:]: "ptlb" reg1 reg2,
-	0x3 [NVA3:]: "vtlb" reg1 reg2,
+[NVA3:]	0x2: "ptlb" reg1 reg2,
+[NVA3:]	0x3: "vtlb" reg1 reg2,
 	0xc: "xbit" reg1 $flags reg2,
 	-: UNK reg1 reg2,
 };
@@ -512,14 +512,14 @@ opff = [16:19] {
 	0x0: "mulu" reg3 reg2 reg1
 	0x1: "muls" reg3 reg2 reg1
 	0x2: "sex" reg3 reg2 reg1
-	0x3 [NVA3:]: "extrs" reg3 reg2 reg1
+[NVA3:]	0x3: "extrs" reg3 reg2 reg1
 	0x4: "and" reg3 reg2 reg1
 	0x5: "or" reg3 reg2 reg1
 	0x6: "xor" reg3 reg2 reg1
-	0x7 [NVA3:]: "extr" reg3 reg2 reg1
+[NVA3:]	0x7: "extr" reg3 reg2 reg1
 	0x8: "xbit" reg3 reg2 reg1
-	0xc [NVA3:]: "div" reg3 reg2 reg1
-	0xd [NVA3:]: "mod" reg3 reg2 reg1
+[NVA3:]	0xc: "div" reg3 reg2 reg1
+[NVA3:]	0xd: "mod" reg3 reg2 reg1
 	0xe: UNK reg3 iorr
 	0xf: "iord" reg3 iorr
 	-: UNK reg3 reg2 reg1

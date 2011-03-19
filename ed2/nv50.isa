@@ -1,21 +1,61 @@
-[...]
+maxoplen = 8;
+piecelen = 4;
+bytelen = 1;
+
+%variants
+
+chipset = NV50 NV84 NVA0 NVAA NVA3;
+ptype = VP GP FP CP;
+
 
 %bitfields
 
+ldst = 2:8;
+sdst = 2:7;
+sm0 = 8;
+adst = 2:4;
+lsrc = 9:15;
+ssrc = 9:14;
+sm1 = 15;
+lsrc2 = 16:22;
+ssrc2 = 16:21;
+sm2 = 22;
+mpi = 25;
+lasrc = 26:27 34;
+sasrc = 26:27;
 op = 28:31;
-op2 = 61:63;
+
+tex = 9:15;
+samp = 17:20;
+sreg = 46:49;
+
+odsten = 35;
+cdst = 36:37;
+cdsten = 38;
 pred = 39:43;
 cond = 44:45;
-lsrc = 9:15;
 lsrc3 = 46:52;
-lasrc = 26:27 34;
-ldst = 2:8;
-adst = 2:4;
-fmem32 = 9:22 WRAP;
+
+cspace = 54:57
+lm0 = 58;
+lm1 = 59;
+
+op2 = 61:63;
+
+fmem8 = 9:24 W;
+fmem16 = 9:23 <<1 W;
+fmem32 = 9:22 <<2 W;
 btarg = 11:26 46:51 << 2;
+
 
 %operands
 
+sdst = $r(sdst);
+ldst = $r(ldst);
+ssrc = $r(ssrc);
+lsrc = $r(lsrc);
+shdst = $r(3:7).(HILO 2);
+imm = IMM(16:21 34:59);
 cond = $c(cond);
 
 lasrc = $a(lasrc);
@@ -23,8 +63,8 @@ lsrc = $r(lsrc);
 lsrc3 = $r(lsrc3);
 ldst = $r(ldst);
 adst = $a(adst);
-fout32 = o[lasrc + #(fmem32)];
-btarg = #(btarg);
+fout32 = o[lasrc + IMM(fmem32)];
+btarg = IMM(btarg);
 
 %instructions
 
@@ -43,7 +83,7 @@ ilong = [op] {
 		},
 		7: [34] {
 			0: nop,
-			1: pmevent #(10:13),
+			1: pmevent IMM(10:13),
 		},
 	},
 }; 
@@ -108,13 +148,13 @@ ppred = [pred] {
 %forms
 
 root = [0:1] {
-	0: 32 ishort,
+	0: 32/32 ishort,
 	1: [32:33] {
-		0: 64 ilong,
-		1: 64 ilong & exit,
-		2: 64 ilong & join,
-		3: 64 iimm,
+		0: 64/64 ilong,
+		1: 64/64 ilong & exit,
+		2: 64/64 ilong & join,
+		3: 64/64 iimm,
 	},
-	2: 32 cshort,
-	3: 64 clong,
+	2: 32/32 cshort,
+	3: 64/64 clong,
 };
