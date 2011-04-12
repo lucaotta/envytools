@@ -13,11 +13,17 @@ include_directories(${LIBXML2_INCLUDE_DIR})
 flex_target(envylex envylex.l ${CMAKE_CURRENT_BINARY_DIR}/envylex.c)
 bison_target(envyparse envyparse.y ${CMAKE_CURRENT_BINARY_DIR}/envyparse.c)
 add_flex_bison_dependency(envylex envyparse)
+
+flex_target(ed2a_lex ed2a_lex.l ${CMAKE_CURRENT_BINARY_DIR}/ed2a_lex.c)
+bison_target(ed2a_parse ed2a_parse.y ${CMAKE_CURRENT_BINARY_DIR}/ed2a_parse.c)
+add_flex_bison_dependency(ed2a_lex ed2a_parse)
+
 include_directories(.)
 
 add_library(rnn rnn.c rnndec.c)
 add_library(nva nva.c)
 add_library(envy coredis.c nv50dis.c nvc0dis.c ctxdis.c fucdis.c pmsdis.c vp2dis.c vp3mdis.c macrodis.c envyprint.c)
+add_library(ed2 ${FLEX_ed2a_lex_OUTPUTS} ${BISON_ed2a_parse_OUTPUTS} ed2a_funcs.c ed2a_print.c ed2_misc.c)
 
 add_executable(envydis envydis.c)
 add_executable(demmio demmio.c)
@@ -28,6 +34,7 @@ add_executable(envyas envyas.c ${FLEX_envylex_OUTPUTS} ${BISON_envyparse_OUTPUTS
 add_executable(nvalist nvalist.c)
 add_executable(nvapeek nvapeek.c)
 add_executable(nvapoke nvapoke.c)
+add_executable(ed2acat ed2acat.c)
 
 target_link_libraries(envydis envy)
 target_link_libraries(envyas envy)
@@ -37,6 +44,7 @@ target_link_libraries(dedma rnn ${LIBXML2_LIBRARIES})
 target_link_libraries(nvalist nva ${PC_PCIACCESS_LIBRARIES})
 target_link_libraries(nvapeek nva ${PC_PCIACCESS_LIBRARIES})
 target_link_libraries(nvapoke nva ${PC_PCIACCESS_LIBRARIES})
+target_link_libraries(ed2acat ed2)
 
 install(TARGETS envydis demmio headergen nvbios envy rnn envyas dedma
 	RUNTIME DESTINATION bin

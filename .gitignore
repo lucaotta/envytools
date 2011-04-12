@@ -15,6 +15,12 @@ nvapoke
 envylex.c
 envyparse.c
 envyparse.h
+ed2a_parse.c
+ed2a_parse.h
+ed2a_lex.c
+ed2a_lex.h
+ed2acat
+libed2.a
 libenvy.a
 librnn.a
 libnva.a
