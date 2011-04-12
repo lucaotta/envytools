@@ -509,20 +509,20 @@ opfe = [16:19] {
 };
 
 opff = [16:19] {
-	0x0: "mulu" reg3 reg2 reg1
-	0x1: "muls" reg3 reg2 reg1
-	0x2: "sex" reg3 reg2 reg1
-[NVA3:]	0x3: "extrs" reg3 reg2 reg1
-	0x4: "and" reg3 reg2 reg1
-	0x5: "or" reg3 reg2 reg1
-	0x6: "xor" reg3 reg2 reg1
-[NVA3:]	0x7: "extr" reg3 reg2 reg1
-	0x8: "xbit" reg3 reg2 reg1
-[NVA3:]	0xc: "div" reg3 reg2 reg1
-[NVA3:]	0xd: "mod" reg3 reg2 reg1
-	0xe: UNK reg3 iorr
-	0xf: "iord" reg3 iorr
-	-: UNK reg3 reg2 reg1
+	0x0: "mulu" reg3 reg2 reg1,
+	0x1: "muls" reg3 reg2 reg1,
+	0x2: "sex" reg3 reg2 reg1,
+[NVA3:]	0x3: "extrs" reg3 reg2 reg1,
+	0x4: "and" reg3 reg2 reg1,
+	0x5: "or" reg3 reg2 reg1,
+	0x6: "xor" reg3 reg2 reg1,
+[NVA3:]	0x7: "extr" reg3 reg2 reg1,
+	0x8: "xbit" reg3 reg2 reg1,
+[NVA3:]	0xc: "div" reg3 reg2 reg1,
+[NVA3:]	0xd: "mod" reg3 reg2 reg1,
+	0xe: UNK reg3 iorr,
+	0xf: "iord" reg3 iorr,
+	-: UNK reg3 reg2 reg1,
 };
 
 %forms
