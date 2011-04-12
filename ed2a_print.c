@@ -97,7 +97,7 @@ void ed2a_print_expr(struct ed2a_expr *expr, FILE *ofile, const struct ed2a_colo
 			fprintf(ofile, "%s(", col->sym);
 		ed2a_print_expr(expr->e1, ofile, col, 7);
 		fprintf(ofile, "%s.", col->sym);
-		ull maxswz = 0;
+		uint64_t maxswz = 0;
 		for (i = 0; i < expr->swz->elemsnum; i++)
 			if (expr->swz->elems[i] > maxswz)
 				maxswz = expr->swz->elems[i];
@@ -132,13 +132,13 @@ void ed2a_print_expr(struct ed2a_expr *expr, FILE *ofile, const struct ed2a_colo
 			for (i = 0; i < expr->swz->elemsnum; i++)
 				fprintf(ofile, "%c", s[expr->swz->elems[i]]);
 		} else if (expr->swz->elemsnum == 1) {
-			fprintf(ofile, "%d", expr->swz->elems[0]);
+			fprintf(ofile, "%"PRIu64, expr->swz->elems[0]);
 		} else {
 			fprintf(ofile, "(");
 			for (i = 0; i < expr->swz->elemsnum; i++) {
 				if (i)
 					fprintf(ofile, " ");
-				fprintf(ofile, "%d", expr->swz->elems[i]);
+				fprintf(ofile, "%"PRIu64, expr->swz->elems[i]);
 			}
 			fprintf(ofile, ")");
 		}
@@ -194,10 +194,10 @@ void ed2a_print_expr(struct ed2a_expr *expr, FILE *ofile, const struct ed2a_colo
 		fprintf(ofile, "%s#%s", col->num, expr->str);
 		break;
 	case ED2A_ET_NUM:
-		fprintf(ofile, "%s%#llx", col->num, expr->num);
+		fprintf(ofile, "%s%#"PRIx64, col->num, expr->num);
 		break;
 	case ED2A_ET_NUM2:
-		fprintf(ofile, "%s%#llx%s:%s%#llx", col->num, expr->num, col->sym, col->num, expr->num2);
+		fprintf(ofile, "%s%#"PRIx64"%s:%s%#"PRIx64, col->num, expr->num, col->sym, col->num, expr->num2);
 		break;
 	case ED2A_ET_REG:
 		fprintf(ofile, "%s$%s", col->reg, expr->str);

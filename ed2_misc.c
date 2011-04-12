@@ -12,7 +12,7 @@ static int gethex(char c) {
 	assert(0);
 }
 
-char *ed2_str_deescape(char *str, ull *len) {
+char *ed2_str_deescape(char *str, uint64_t *len) {
 	int rlen = 0;
 	int i;
 	for (i = 0; str[i]; i++) {

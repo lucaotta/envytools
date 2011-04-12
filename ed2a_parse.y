@@ -19,7 +19,7 @@ void ed2a_error (YYLTYPE *loc, yyscan_t lex_state, void (*fun) (struct ed2a_insn
 %parse-param { struct ed2a_file **res }
 
 %union {
-	ull num;
+	uint64_t num;
 	char *str;
 	struct ed2a_expr *expr;
 	struct ed2a_file *file;

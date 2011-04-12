@@ -2,10 +2,9 @@
 #define ED2_TYPES_H
 
 #include <stdlib.h>
+#include <inttypes.h>
 
-typedef unsigned long long ull;
-
-char *ed2_str_deescape(char *str, ull *len);
+char *ed2_str_deescape(char *str, uint64_t *len);
 
 #define ADDARRAY(a, e) \
 	do { \

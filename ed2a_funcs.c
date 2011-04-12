@@ -49,13 +49,13 @@ struct ed2a_expr *ed2a_make_expr_rvec(struct ed2a_rvec *rvec) {
 	return res;
 }
 
-struct ed2a_expr *ed2a_make_expr_num(ull num) {
+struct ed2a_expr *ed2a_make_expr_num(uint64_t num) {
 	struct ed2a_expr *res = ed2a_make_expr(ED2A_ET_NUM);
 	res->num = num;
 	return res;
 }
 
-struct ed2a_expr *ed2a_make_expr_num2(ull num, ull num2) {
+struct ed2a_expr *ed2a_make_expr_num2(uint64_t num, uint64_t num2) {
 	struct ed2a_expr *res = ed2a_make_expr(ED2A_ET_NUM2);
 	res->num = num;
 	res->num2 = num2;
@@ -85,7 +85,7 @@ struct ed2a_swz *ed2a_make_swz_empty() {
 	return calloc(sizeof *ed2a_make_swz_empty(), 1);
 }
 
-struct ed2a_swz *ed2a_make_swz_num(ull num) {
+struct ed2a_swz *ed2a_make_swz_num(uint64_t num) {
 	struct ed2a_swz *res = ed2a_make_swz_empty();
 	ADDARRAY(res->elems, num);
 	res->style = ED2A_SWZ_NUM;

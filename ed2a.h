@@ -61,7 +61,7 @@ struct ed2a_expr {
 	} type;
 	struct ed2a_expr *e1;
 	struct ed2a_expr *e2;
-	ull num, num2;
+	uint64_t num, num2;
 	char *str;
 	char *str2;
 	struct ed2a_ipiece *ipiece;
@@ -88,14 +88,14 @@ struct ed2a_swz {
 		ED2A_SWZ_LH,
 		ED2A_SWZ_NUM,
 	} style;
-	ull *elems;
+	uint64_t *elems;
 	int elemsnum;
 	int elemsmax;
 };
 
 struct ed2a_astr {
 	char *str;
-	ull len;
+	uint64_t len;
 };
 
 struct ed2a_expr *ed2a_make_expr(enum ed2a_etype type);
@@ -105,12 +105,12 @@ struct ed2a_expr *ed2a_make_expr_swz(struct ed2a_expr *, struct ed2a_swz *);
 struct ed2a_expr *ed2a_make_expr_str(enum ed2a_etype type, char *str);
 struct ed2a_expr *ed2a_make_expr_ipiece(struct ed2a_ipiece *);
 struct ed2a_expr *ed2a_make_expr_reg2(char *str, char *str2);
-struct ed2a_expr *ed2a_make_expr_num(ull);
-struct ed2a_expr *ed2a_make_expr_num2(ull, ull);
+struct ed2a_expr *ed2a_make_expr_num(uint64_t);
+struct ed2a_expr *ed2a_make_expr_num2(uint64_t, uint64_t);
 struct ed2a_expr *ed2a_make_expr_rvec(struct ed2a_rvec *rv);
 struct ed2a_insn *ed2a_make_label_insn(char *str);
 struct ed2a_swz *ed2a_make_swz_empty();
-struct ed2a_swz *ed2a_make_swz_num(ull num);
+struct ed2a_swz *ed2a_make_swz_num(uint64_t num);
 struct ed2a_swz *ed2a_make_swz_str(char *str);
 struct ed2a_swz *ed2a_make_swz_cat(struct ed2a_swz *a, struct ed2a_swz *b);
 
