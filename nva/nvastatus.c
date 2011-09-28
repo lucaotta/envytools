@@ -65,12 +65,17 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+	fprintf(stdout, "Chipset: NV%X\n", nva_cards[cnum].chipset);
+	int card_type = nva_cards[cnum].chipset;
+	/* NV6x cards are NV4x actually */
+	if (card_type & 0xF0 == 0x60)
+		card_type = 0x40;
+
 	for (i = 0; i < countof(register_table); ++i)
 	{
 		struct StatusRegister *r = &register_table[i];
-		int card_type = nva_cards[cnum].chipset;
 		if (card_type >= r->card_type_start && card_type < r->card_type_end)
-			printf("%08X\n", nva_rd32(cnum, r->address));
+			fprintf(stdout, "%08X: %08X\n", r->address, nva_rd32(cnum, r->address));
 	}
 
 	return 0;
