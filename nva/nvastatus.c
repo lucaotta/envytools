@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 	for (i = 0; i < countof(register_table); ++i)
 	{
 		struct StatusRegister *r = &register_table[i];
-		int card_type = nva_cards[cnum].card_type;
+		int card_type = nva_cards[cnum].chipset;
 		if (card_type >= r->card_type_start && card_type < r->card_type_end)
 			printf("%08X\n", nva_rd32(cnum, r->address));
 	}
